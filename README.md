@@ -3,14 +3,15 @@
 This repository allows for setting a dynamic supercool schedule using the Ecobee API in Python programs.
 The cool temperature and schedule for the climates are adjusted based on the outdoor temperature.
 
-This repository leverages the pyecobee python library located [here](https://github.com/sfanous/Pyecobee)
+This repository leverages the pyecobee python library located [here](https://github.com/sfanous/Pyecobee).
 
 See additional documentation on the Ecobee API [here](https://www.ecobee.com/home/developer/api/introduction/index.shtml).
 
 ## Supercool Information
 This program is best for those on a time-of-use plan from your utility company.
 Certain days of the week will have off-peak and on-peak hours.
-Supercooling consists of precooling your house during off-peak (less expensive) hours.
+Supercooling consists of precooling your house during off-peak (less expensive) hours and not running the AC at all
+during the on-peak hours.
 
 A typical days schedule for supercooling consists of the following climates (in this order):
 - Sleep
@@ -20,7 +21,7 @@ A typical days schedule for supercooling consists of the following climates (in 
 - Home
 - Sleepnight
 
-###Supercool Gauge
+### Supercool Gauge
 The below table is just an example.  Your start times and cool temps will vary depending on many factors such as:
 - House square footage
 - Single or double story
