@@ -18,7 +18,7 @@ A typical days schedule for supercooling consists of the following climates (in 
 - Sleep
 - Precool
 - Supercool
-- Time of Use (Away)
+- Time of Use/On-peak (Away)
 - Home
 - Sleepnight
 
@@ -104,10 +104,11 @@ To allow for this, Ecobee vacations are used on off-peak days in order to allow 
 This essentially bypasses what would normally be a supercool day.
 
 #### Notes:
-- They will only be created if the `timeofuse_holidays` date is in the future.
+- Off-peak vacations will only be created if the `timeofuse_holidays` date is in the future.
 - By default, if the off-peak vacation already exists it will not overwrite.
-- There is a force=True parameter that will delete the existing off-peak vacation and recreate.
-- Vacations don't pad the temperature like other areas of the Ecobee API.
+  - There is a force=True parameter on the create_vacation() function that will delete the existing off-peak
+    vacation and recreate.
+- Vacations don't pad the temperature like other areas of the Ecobee API.  So 77° is 77 and not 770.
 
 #### Example
 To set the off-peak days edit the `timeofuse_holidays` values in the local_settings.py with comma separated dates
@@ -117,30 +118,30 @@ timeofuse_holidays_cool_temp = 77
 timeofuse_holidays_start_time = "20:00"
 timeofuse_holidays_end_time = "20:00"
 ```
-In the above example two vacations will be created. The first is created from 2021-07-04 20:00 to 2021-07-05 20:00
-with a cool temp set to 77 during the vacation. Notice that the start date is actually the day before (07-04) in 
-order to override the last climate of the previous day (sleepnight).
+With the above configuration two vacations will be created. The first is created from 2021-07-04 20:00 to 
+2021-07-05 20:00 with a cool temp set to 77 during the vacation. Notice that the start date is actually the 
+day before (07-04) in order to override the last climate of the previous day (sleepnight).
 
 ### local_settings.py
-- logfile: Log file path
-- loglevel: Log level
-- thermostat_name: Name of the Ecobee thermostat
-- climates: List of climates name prefixes in order (comma seperated)
-- supercool_values: Dictionary with nested lists reflecting the supercool program values (see Program section above) 
-- days_to_set: The days you want to set the program for. (comma separated)
+- **logfile:** Log file path
+- **loglevel:** Log level
+- **thermostat_name:** Name of the Ecobee thermostat
+- **climates:** List of climates name prefixes in order (comma seperated)
+- **supercool_values:** Dictionary with nested lists reflecting the supercool program values (see Program section above) 
+- **days_to_set:** The days you want to set the program for. (comma separated)
   - Allows for varied values like "Mon,Tue,Wednesday" or "tomorrow" or "weekdays" for example. 
-- timeofuse_day_range: A day range reflecting time-of-use days.  This is expected to be a consecutive day range.
+- **timeofuse_day_range:** A day range reflecting time-of-use days.  This is expected to be a consecutive day range.
   - This is a day index starting with 0 - Monday.  So `"0-4"` would be Monday-Friday as your time-of-use days.
-- timeofuse_restricted: Whether or not to limit the days being set to time-of-use days. (bool)
+- **timeofuse_restricted:** Whether or not to limit the days being set to time-of-use days. (bool)
   - If `True` and the `days_to_set` fall outside a time-of-use day then no change is made.
-- timeofuse_holidays: A list of off-peak vacation days. (comma separated)
-- timeofuse_holidays_cool_temp: The cool temp to hold the program at during the off-peak vacation days. (not padded)
-- timeofuse_holidays_start_time: The start time for the off-peak vacation days.
+- **timeofuse_holidays:** A list of off-peak vacation days. (comma separated)
+- **timeofuse_holidays_cool_temp:** The cool temp to hold the program at during the off-peak vacation days. (not padded)
+- **timeofuse_holidays_start_time:** The start time for the off-peak vacation days.
   - Since the off-peak vacation days start the day prior this should typically be "20:00" or "22:00" 
     (i.e. the start of sleepnight climate from previous day) (see Off-peak Holidays section above)
-- timeofuse_holidays_end_time: The end time for the off-peak vacation days.
+- **timeofuse_holidays_end_time:** The end time for the off-peak vacation days.
   - This should end when the sleepnight climate begins, typically "20:00" or "22:00".
-- supercool_low_temp_cutoff: The low-end cutoff temperature to decide whether this program will make any changes.
+- **supercool_low_temp_cutoff:** The low-end cutoff temperature to decide whether this program will make any changes.
   - For example, if the cutoff is set to 879 (87.9°) but the outside temperature will only reach 865 (86.5°).
     No changes will be made to the climates or schedule for that day.
 
@@ -156,16 +157,16 @@ The program supports the following notification services:
 Each can be configured with relative ease in the `local_settings.py` file.
 
 ## Assumptions and Limitations
-- Time-of-use days are consecutive.  For example, Monday-Friday (0-5).
-- Currently, using the Ecobee API for weather forecast data (for outdoor temp) which is limited to 4 days.
+- Time-of-use days are consecutive.  For example, Monday-Friday (0-4).
+- Currently, using the Ecobee API weather forecast data (for outdoor temp) which is limited to 4 days.
 - Leverages new (unique) climates for each day of the week.
 - The built-in (system) climates are no longer used.
-- This program does not delete any climates.
-- This program does not create climates for days with no time-of-use like weekends for example.  One option is to use
+- This does not delete any climates.
+- This does not create climates for days with no on-peak hours like weekends for example.  One option is to use
   a static `Weekend` climate set to a specific cool temp like 77° to cover Saturday and Sunday.
-- eco+ mode is disabled indefinitely
-- Currently, only works with a single thermostat
-- Time of use (off-peak) holidays will need to be updated each year in `local_settings.py`
+- eco+ mode is disabled indefinitely.
+- Currently, only works with a single thermostat.
+- Time of use (off-peak) holidays will need to be updated each year in `local_settings.py`.
 
 ## Bugs and Contributing
 
