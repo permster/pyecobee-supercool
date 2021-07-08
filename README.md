@@ -69,7 +69,23 @@ ecobee_service = core.authenticate("Home")
 ## Documentation
 
 ### Program (Climates and Schedule)
-Update the `supercool_values` in the local_settings.py file based on your own Supercool gauge for your house. 
+Update the `supercool_values` in the local_settings.py file based on your own Supercool gauge for your house.
+This value is a dictionary with nested lists.  The temperatures are padded so 1089 is 108.9°.
+I've taken the liberty of showing the value in table format for an easier time understanding what 
+`supercool_values` represents.
+
+|Temp Range  |Sleep Temp|Sleep End Time|Precool Temp|Precool End Time|Supercool Temp|Supercool End Time|Away Temp|Away End Time|Home Temp|Home End Time|Home Temp|Sleepnight End Time|
+|------------|:--------:|:------------:|:----------:|:--------------:|:------------:|:----------------:|:-------:|:-----------:|:-------:|:-----------:|:-------:|:-----------------:|
+|"880-979"   |760       |"12:30"       |750         |"13:30"         |740           |"15:00"           |820      |"20:00"      |770      |"22:00"      |760      |""                 |
+|"980-1029"  |760       |"12:00"       |750         |"12:30"         |730           |"15:00"           |820      |"20:00"      |770      |"22:00"      |760      |""                 |
+|"1030-1059" |750       |"11:30"       |740         |"12:30"         |720           |"15:00"           |820      |"20:00"      |770      |"22:00"      |750      |""                 |
+|"1060-1089" |750       |"10:30"       |730         |"12:00"         |710           |"15:00"           |820      |"20:00"      |770      |"22:00"      |750      |""                 |
+|"1090-1119" |740       |"10:00"       |720         |"11:30"         |700           |"15:00"           |820      |"20:00"      |770      |"22:00"      |740      |""                 |
+|"1120-1149" |740       |"09:00"       |710         |"11:00"         |690           |"15:00"           |820      |"20:00"      |770      |"22:00"      |740      |""                 |
+|"1150-1300" |730       |"08:00"       |700         |"11:00"         |680           |"15:00"           |820      |"20:00"      |770      |"22:00"      |730      |""                 |
+
+Notice that the `Sleepnight End Time` column is empty quotes because this climate continues 
+to the end of day (midnight). 
 
 To workaround the issue of overwriting climates still remaining on the current day, each day has a unique set of climates.
 - Monday: sleep0, precool0, supercool0, away0, home0, sleepnight0
