@@ -23,16 +23,19 @@ A typical days schedule for supercooling consists of the following climates (in 
 - Sleepnight
 
 ### Supercool Gauge
-The below table is just an example.  Your start times and cool temps will vary depending on many factors such as:
+The amount of supercooling necessary is dependent on many factors such as:
 - Outside temperature
 - House square footage
 - Single or double story
 - Which way the house faces
 - How many AC units you have
 - How efficient your house is (insulation, windows, doors, etc.)
-- How many hours of on-peak there are each time-of-use day (table based on a 5-hour on-peak window)
+- How many hours of on-peak there are each time-of-use day
 
-**Table based on on-peak time between:** 15:00 - 20:00
+The main takeaway there is that you <ins>don't</ins> need to supercool your house to the same level if the outside
+high temp will be 90° versus when it's 110° outside.
+
+The below table is just an example.  It is based on a 5-hour on-peak time window.
 
 |Outdoor Temp|Sleep Temp|Precool Start|Precool Temp|Supercool Start|Supercool Temp|
 |------------|:--------:|:-----------:|:----------:|:-------------:|:------------:|
@@ -44,8 +47,12 @@ The below table is just an example.  Your start times and cool temps will vary d
 |112° - 114° |74°       |09:00        |71°         |11:00          |69°           |
 |115° - ?    |73°       |08:00        |70°         |11:00          |68°           |
 
-**Note:** The supercool temps in the table require that the target cool temp is reached prior to time of use, 
-15:00 in this example. This may require starting the precool and supercool climates earlier in the day.
+**Note:**
+- The table is based on on-peak time between: 15:00 - 20:00
+- Your start times and cool temps will vary.
+- The supercool temps in the table require that the target cool temp is reached prior to on-peak, 
+  15:00 in this example. This may require starting the precool and supercool climates earlier in
+  the day and/or lowering the cool temps for the climates leading up to on-peak.
 
 ## Initial set up
 Clone/download the repository and run `pip install -r requirements.txt`.
@@ -150,7 +157,7 @@ See example file `sample_local_settings.py` for reference.
 ### Notifications
 The program supports the following notification services:
 - Pushbullet
-- Join
+- Join (joaoapps)
 - Pushover
 - Email
 
@@ -162,8 +169,8 @@ Each can be configured with relative ease in the `local_settings.py` file.
 - Leverages new (unique) climates for each day of the week.
 - The built-in (system) climates are no longer used.
 - This does not delete any climates.
-- This does not create climates for days with no on-peak hours like weekends for example.  One option is to use
-  a static `Weekend` climate set to a specific cool temp like 77° to cover Saturday and Sunday.
+- This does not create climates for days with no on-peak hours (by default) like weekends for example.
+  One option is to use a static `Weekend` climate set to a specific cool temp like 77° to cover Saturday and Sunday.
 - eco+ mode is disabled indefinitely.
 - Currently, only works with a single thermostat.
 - Time of use (off-peak) holidays will need to be updated each year in `local_settings.py`.
