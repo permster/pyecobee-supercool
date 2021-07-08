@@ -45,6 +45,7 @@ def initLogger(debug=False, logfile=None, loglevel=None):
     else:
         logger.setLevel(logging.INFO)
 
+    logger.info("----------------------------------------------------------------------")
     logger.info("Logging initialized from " + __name__)
 
 
