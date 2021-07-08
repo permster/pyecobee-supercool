@@ -5,7 +5,8 @@ The cool temperature and schedule for the climates are adjusted based on the out
 
 This repository leverages the pyecobee python library located [here](https://github.com/sfanous/Pyecobee).
 
-See additional documentation on the Ecobee API [here](https://www.ecobee.com/home/developer/api/introduction/index.shtml).
+See additional documentation on the Ecobee API 
+[here](https://www.ecobee.com/home/developer/api/introduction/index.shtml).
 
 ## Supercool Information
 This program is best for those on a time-of-use plan from your utility company.
@@ -23,6 +24,7 @@ A typical days schedule for supercooling consists of the following climates (in 
 
 ### Supercool Gauge
 The below table is just an example.  Your start times and cool temps will vary depending on many factors such as:
+- Outside temperature
 - House square footage
 - Single or double story
 - Which way the house faces
@@ -42,36 +44,31 @@ The below table is just an example.  Your start times and cool temps will vary d
 |112° - 114° |74°       |09:00        |71°         |11:00          |69°           |
 |115° - ?    |73°       |08:00        |70°         |11:00          |68°           |
 
-**Note:** The supercool temps in the table require that the target cool temp is reached prior to time of use, 15:00 in this example.
-This may require starting the precool and supercool climates earlier in the day.
+**Note:** The supercool temps in the table require that the target cool temp is reached prior to time of use, 
+15:00 in this example. This may require starting the precool and supercool climates earlier in the day.
 
 ## Initial set up
 Clone/download the repository and run `pip install -r requirements.txt`.
 
-## Logging In
+### Logging In
 
 ```python
 from ecobee import core
 ecobee_service = core.authenticate("Home") 
 ```
 
-## Assumptions and Limitations
-- Time-of-use days are consecutive.  For example, Monday-Friday (0-5).
-- Currently, using the Ecobee API for weather forecast data (for outdoor temp) which is limited to 4 days.
-- Leverages new (unique) climates for each day of the week.
-- The built-in (system) climates are no longer used.
-- This program does not delete any climates.
-- This program does not create climates for days with no time-of-use like weekends for example.  One option is to use a static `Weekend` climate set to a specific cool temp like 77° to cover Saturday and Sunday.
-- eco+ mode is disabled indefinitely
-- Currently, only works with a single thermostat
-- Time of use (off-peak) holidays will need to be updated each year in `local_settings.py`
+See main.py for additional example usage.
+Main.py configuration values are stored in the `local_settings.py` file.
+To create the `local_settings.py` file initially just use the `sample_local_settings.py` file as a template.
 
 ## Documentation
 
 ### Program (Climates and Schedule)
-Update the `supercool_values` in the local_settings.py file based on your own Supercool gauge for your house.
-This value is a dictionary with nested lists.  The temperatures are padded so 1089 is 108.9°.
-I've taken the liberty of showing the value in table format for an easier time understanding what 
+Update the `supercool_values` variable in the `local_settings.py` file based on your own Supercool gauge for 
+your house.  This value is a dictionary with nested lists.  The temperatures are padded so for example, 1089 is 108.9°.
+The climate names and order used in `supercool_values` are based on the `climates` variable in `local_settings.py`.
+
+I've taken the liberty of showing the `supercool_values` in a table layout for a better visualization of what 
 `supercool_values` represents.
 
 |Outdoor Temp Range  |Sleep Temp|Sleep End Time|Precool Temp|Precool End Time|Supercool Temp|Supercool End Time|Away Temp|Away End Time|Home Temp|Home End Time|Home Temp|Sleepnight End Time|
@@ -84,21 +81,33 @@ I've taken the liberty of showing the value in table format for an easier time u
 |"1120-1149"         |740       |"09:00"       |710         |"11:00"         |690           |"15:00"           |820      |"20:00"      |770      |"22:00"      |740      |""                 |
 |"1150-1300"         |730       |"08:00"       |700         |"11:00"         |680           |"15:00"           |820      |"20:00"      |770      |"22:00"      |730      |""                 |
 
-Notice that the `Sleepnight End Time` column is empty quotes because this climate continues 
-to the end of day (midnight). 
+A few things to note:
+- Start times of each climate are omitted.
+    - As such the first climate of each day (sleep) starts at 00:00.
+    - The last climate of each day (sleepnight) goes until 23:30 (last schedule slot of the day).  
+      This is why the last climate end times are empty quotes.
 
-To workaround the issue of overwriting climates still remaining on the current day, each day has a unique set of climates.
+One challenge with this dynamic approach to climates is that they will step on each other.  One example is if you
+use the `Sleep` climate in the morning and again at night on the same day.  In this scenario you can't have
+unique climate values for morning sleep versus night sleep.  To workaround the issue of
+overwriting climates still remaining on the current day, each day has a unique set of climates.
 - Monday: sleep0, precool0, supercool0, away0, home0, sleepnight0
 - Tuesday: sleep1, precool1, supercool1, away1, home1, sleepnight1
 - Wednesday: sleep2, precool2, supercool2, away2, home2, sleepnight2
 - Etc.
 
-Note: For this design to work the built-in (system) climates are no longer used.
+**Note:** For this design to work the built-in (system) climates are no longer used.
 
 ### Off-peak Holidays
 Some utilities observe certain holidays as off-peak days for time-of-use plans.
 To allow for this, Ecobee vacations are used on off-peak days in order to allow for a static cool temp.
 This essentially bypasses what would normally be a supercool day.
+
+#### Notes:
+- They will only be created if the `timeofuse_holidays` date is in the future.
+- By default, if the off-peak vacation already exists it will not overwrite.
+- There is a force=True parameter that will delete the existing off-peak vacation and recreate.
+- Vacations don't pad the temperature like other areas of the Ecobee API.
 
 #### Example
 To set the off-peak days edit the `timeofuse_holidays` values in the local_settings.py with comma separated dates
@@ -108,12 +117,58 @@ timeofuse_holidays_cool_temp = 77
 timeofuse_holidays_start_time = "20:00"
 timeofuse_holidays_end_time = "20:00"
 ```
-In the above example two vacations will be created.
-The first is created from 2021-07-04 20:00 to 2021-07-05 20:00 with a cool temp set to 77 during the vacation.
-Notice that the start date is actually the day before (07-04) in order to override the previous nights sleep climate.
+In the above example two vacations will be created. The first is created from 2021-07-04 20:00 to 2021-07-05 20:00
+with a cool temp set to 77 during the vacation. Notice that the start date is actually the day before (07-04) in 
+order to override the last climate of the previous day (sleepnight).
 
-See main.py for additional example usage.  Main.py configuration values are stored in local_settings.py.  See example file `sample_local_settings.py`.
+### local_settings.py
+- logfile: Log file path
+- loglevel: Log level
+- thermostat_name: Name of the Ecobee thermostat
+- climates: List of climates name prefixes in order (comma seperated)
+- supercool_values: Dictionary with nested lists reflecting the supercool program values (see Program section above) 
+- days_to_set: The days you want to set the program for. (comma separated)
+  - Allows for varied values like "Mon,Tue,Wednesday" or "tomorrow" or "weekdays" for example. 
+- timeofuse_day_range: A day range reflecting time-of-use days.  This is expected to be a consecutive day range.
+  - This is a day index starting with 0 - Monday.  So `"0-4"` would be Monday-Friday as your time-of-use days.
+- timeofuse_restricted: Whether or not to limit the days being set to time-of-use days. (bool)
+  - If `True` and the `days_to_set` fall outside a time-of-use day then no change is made.
+- timeofuse_holidays: A list of off-peak vacation days. (comma separated)
+- timeofuse_holidays_cool_temp: The cool temp to hold the program at during the off-peak vacation days. (not padded)
+- timeofuse_holidays_start_time: The start time for the off-peak vacation days.
+  - Since the off-peak vacation days start the day prior this should typically be "20:00" or "22:00" 
+    (i.e. the start of sleepnight climate from previous day) (see Off-peak Holidays section above)
+- timeofuse_holidays_end_time: The end time for the off-peak vacation days.
+  - This should end when the sleepnight climate begins, typically "20:00" or "22:00".
+- supercool_low_temp_cutoff: The low-end cutoff temperature to decide whether this program will make any changes.
+  - For example, if the cutoff is set to 879 (87.9°) but the outside temperature will only reach 865 (86.5°).
+    No changes will be made to the climates or schedule for that day.
+
+See example file `sample_local_settings.py` for reference.
+
+### Notifications
+The program supports the following notification services:
+- Pushbullet
+- Join
+- Pushover
+- Email
+
+Each can be configured with relative ease in the `local_settings.py` file.
+
+## Assumptions and Limitations
+- Time-of-use days are consecutive.  For example, Monday-Friday (0-5).
+- Currently, using the Ecobee API for weather forecast data (for outdoor temp) which is limited to 4 days.
+- Leverages new (unique) climates for each day of the week.
+- The built-in (system) climates are no longer used.
+- This program does not delete any climates.
+- This program does not create climates for days with no time-of-use like weekends for example.  One option is to use
+  a static `Weekend` climate set to a specific cool temp like 77° to cover Saturday and Sunday.
+- eco+ mode is disabled indefinitely
+- Currently, only works with a single thermostat
+- Time of use (off-peak) holidays will need to be updated each year in `local_settings.py`
 
 ## Bugs and Contributing
 
-Please feel free to report issues or make general improvements by [raising a new issue](https://github.com/permster/pyecobee-supercool/issues/new) and/or [open a pull request](https://github.com/permster/pyecobee-supercool/compare).
+Please feel free to report issues or make general improvements by 
+[raising a new issue](https://github.com/permster/pyecobee-supercool/issues/new) and/or 
+[open a pull request](https://github.com/permster/pyecobee-supercool/compare).
