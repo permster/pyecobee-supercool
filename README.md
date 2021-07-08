@@ -68,9 +68,9 @@ ecobee_service = core.authenticate("Home")
 ## Documentation
 
 ### Program (Climates and Schedule)
-Update the program values under the get_program_values() function in core.py based on your own Supercool gauge for your house. 
+Update the `supercool_values` in the local_settings.py file based on your own Supercool gauge for your house. 
 
-To workaround the issue of overwriting climates still remaining on the current day each day has a unique set of climates.
+To workaround the issue of overwriting climates still remaining on the current day, each day has a unique set of climates.
 - Monday: sleep0, precool0, supercool0, away0, home0, sleepnight0
 - Tuesday: sleep1, precool1, supercool1, away1, home1, sleepnight1
 - Wednesday: sleep2, precool2, supercool2, away2, home2, sleepnight2
