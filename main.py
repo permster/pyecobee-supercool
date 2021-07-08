@@ -26,7 +26,6 @@ thermostat = core.Ecobee(ecobee_service=core.authenticate(thermostat_name),
                          supercool_values=supercool_values)
 
 # Get unique climate names for each day and create
-# ToDo: Modify to not create the entire climate set, just create what is needed to set the days_to_set program values.
 thermostat.set_new_climate_names(create=True, notify=True)
 
 # Get program values based on outdoor high temp

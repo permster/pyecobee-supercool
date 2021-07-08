@@ -439,6 +439,8 @@ class Ecobee:
             return -1
 
     def set_new_climate_names(self, create=False, notify=False):
+        # ToDo: Modify to not create the entire climate set, just create what
+        #  is needed to set the days_to_set program values.
         self.new_climate_names = [f'{climate_name_prefix}{i}' for climate_name_prefix in
                                   self.new_climate_prefixes for i in range(7)]
 
