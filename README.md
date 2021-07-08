@@ -64,6 +64,7 @@ ecobee_service = core.authenticate("Home")
 - This program does not create climates for days with no time-of-use like weekends for example.  One option is to use a static `Weekend` climate set to a specific cool temp like 77° to cover Saturday and Sunday.
 - eco+ mode is disabled indefinitely
 - Currently, only works with a single thermostat
+- Time of use (off-peak) holidays will need to be updated each year in `local_settings.py`
 
 ## Documentation
 

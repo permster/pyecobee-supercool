@@ -16,7 +16,16 @@ supercool_values = {
 days_to_set = "tomorrow"
 timeofuse_day_range = "0-4"
 timeofuse_restricted = True
-timeofuse_holidays = "2021-05-31,2021-07-05,2021-09-06"
+timeofuse_holidays = "2021-01-01," \
+                     "2021-01-18," \
+                     "2021-02-15," \
+                     "2021-03-31," \
+                     "2021-05-31," \
+                     "2021-07-05," \
+                     "2021-09-06," \
+                     "2021-11-11," \
+                     "2021-11-25," \
+                     "2021-12-24"
 timeofuse_holidays_cool_temp = 77
 timeofuse_holidays_start_time = "20:00"
 timeofuse_holidays_end_time = "20:00"
