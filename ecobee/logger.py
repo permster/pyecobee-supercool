@@ -31,6 +31,8 @@ def initLogger(debug=False, logfile=None, loglevel=None):
     logger.addHandler(logging_out)
     logger.addHandler(logging_err)
     if logfile is not None:
+        if not os.path.isabs(logfile):
+            logfile = f'{os.path.abspath(os.path.dirname(sys.argv[0]))}/{logfile}'
         os.makedirs(os.path.dirname(logfile), exist_ok=True)
         logging_file = logging.FileHandler(logfile)
         logging_file.setFormatter(formatter)

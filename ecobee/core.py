@@ -48,15 +48,24 @@ def authorize(ecobee_service):
     input()
 
 
-def authenticate(thermostat_name):
+def authenticate(thermostat_name, db_file=None):
+    pyecobee_db = ecobee_service = None
+    if db_file is None:
+        db_file = f'{helpers.get_script_dir()}/pyecobee_db'
     try:
-        pyecobee_db = shelve.open('pyecobee_db', protocol=2)
+        pyecobee_db = shelve.open(db_file, protocol=2)
         ecobee_service = pyecobee_db[thermostat_name]
     except KeyError:
         application_key = input('Please enter the API key of your ecobee App: ')
         ecobee_service = EcobeeService(thermostat_name=thermostat_name, application_key=application_key)
     finally:
-        pyecobee_db.close()
+        try:
+            pyecobee_db.close()
+        except Exception as e:
+            logger.error(f'Error closing shelf DB, error: {e}')
+
+    if ecobee_service is None:
+        return
 
     if ecobee_service.authorization_token is None:
         authorize(ecobee_service)
@@ -548,8 +557,8 @@ class Ecobee:
                     #  Will require pulling outdoor temp on a per day basis
                     if daynum == self.tomorrow_daynum:
                         program[previous_daynum] = [[climate_ref_previous,
-                                                    self.supercool_values[sc_temp][0][0],
-                                                    self.supercool_values[sc_temp][-2][1]]]
+                                                     self.supercool_values[sc_temp][0][0],
+                                                     self.supercool_values[sc_temp][-2][1]]]
 
                     # Handle last day of time of use
                     if daynum == self.timeofuse_days[-1]:

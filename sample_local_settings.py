@@ -1,6 +1,4 @@
-import os
-
-logfile = f'{os.path.abspath(os.curdir)}/pyecobee-supercool.log'
+logfile = "pyecobee-supercool.log"
 loglevel = "WARNING"
 thermostat_name = "Home"
 climates = "sleep,precool,supercool,away,home,sleepnight"  # Order needs to match supercool_values order below

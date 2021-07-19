@@ -1,9 +1,15 @@
 # -*- coding: utf-8 -*-
 
+import os
+import sys
 import calendar
 import local_settings
 from datetime import datetime, timedelta
 from ecobee import notifications, logger
+
+
+def get_script_dir():
+    return os.path.abspath(os.path.dirname(sys.argv[0]))
 
 
 def get_time_slot(start_time, end_time=''):
