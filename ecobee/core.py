@@ -90,7 +90,8 @@ class Ecobee:
                                   include_weather=True,
                                   include_sensors=True,
                                   include_location=True,
-                                  include_events=True)
+                                  include_events=True,
+                                  include_settings=True)
     DEFAULT_CLIMATE = "sleep"
 
     def __init__(
@@ -103,6 +104,7 @@ class Ecobee:
             thermostat_object=None,
             thermostat_climates=None,
             thermostat_events=None,
+            thermostat_settings=None,
             selection=None,
             thermostat_schedule=None,
             temp_high=None,
@@ -117,7 +119,9 @@ class Ecobee:
             timezone=None,
             isdaylightsavings=None,
             supercool_cutoff=None,
-            supercool_values=None
+            supercool_values=None,
+            hvac_mode=None,
+            supercool_months=None
     ):
         """
         Construct an Ecobee thermostat instance
@@ -144,6 +148,8 @@ class Ecobee:
         if self._temp_high == 9999:
             logger.error('Unknown high temperature, unable to make program changes.')
         self._thermostat_events = thermostat_events if thermostat_events is not None else self.thermostat_events
+        self._thermostat_settings = thermostat_settings if thermostat_settings is not None else \
+            self.thermostat_settings
         self._high_temp_list = high_temp_list if high_temp_list is not None else self.get_forecast_high_temps()
         self.new_climate_prefixes = new_climate_prefixes
         self.new_climate_names = new_climate_names
@@ -156,6 +162,9 @@ class Ecobee:
         self._isdaylightsavings = isdaylightsavings if isdaylightsavings is not None else self.isdaylightsavings
         self._supercool_cutoff = supercool_cutoff if supercool_cutoff is not None else self.supercool_cutoff
         self._supercool_values = supercool_values if supercool_values is not None else self.supercool_values
+        self._hvac_mode = hvac_mode if hvac_mode is not None else self.hvac_mode
+        self._during_supercool_months = self.during_supercool_months = supercool_months \
+            if supercool_months is not None else self.during_supercool_months
 
     @property
     def ecobee_service(self):
@@ -204,6 +213,10 @@ class Ecobee:
     @property
     def thermostat_events(self):
         return self._thermostat_list[self.thermostat_index].events
+
+    @property
+    def thermostat_settings(self):
+        return self._thermostat_list[self.thermostat_index].settings
 
     @property
     def temp_high(self):
@@ -283,6 +296,22 @@ class Ecobee:
     def supercool_values(self):
         return self._supercool_values
 
+    @property
+    def hvac_mode(self):
+        return self._thermostat_list[self.thermostat_index].settings.hvac_mode.lower()
+
+    @property
+    def during_supercool_months(self):
+        return self._during_supercool_months
+
+    @during_supercool_months.setter
+    def during_supercool_months(self, value):
+        temp_list = helpers.get_range_from_string(value)
+        if temp_list[0] <= datetime.now().month <= temp_list[1]:
+            self._during_supercool_months = True
+        else:
+            self._during_supercool_months = False
+
     def get_thermostats(self, selection):
         thermostat_response = self._ecobee_service.request_thermostats(selection)
         if thermostat_response.status.code == 0:
@@ -348,6 +377,7 @@ class Ecobee:
         return False
 
     def set_thermostat_schedule(self, program, update=False, notify=False):
+        title = message = None
         schedule = self.thermostat_schedule
 
         # prefill nested list with default climateRef (sleep)
@@ -360,6 +390,8 @@ class Ecobee:
         for idx, day in enumerate(program):
             if len(day) == 0:
                 continue
+
+            logger.debug(f'Setting the schedule for {helpers.get_day_name(idx)}.')
 
             last_time = '00:00'
             for climate_slot in day:
@@ -385,30 +417,44 @@ class Ecobee:
                 last_time = end_time
 
         if update:
+            logger.info('Attempting to update the thermostat schedule.')
             return_value = self.update_thermostat()
             if return_value > 0:
                 # Success
-                if notify:
-                    helpers.send_notifications('Ecobee schedule (Success)',
-                                               'Successfully updated thermostat schedule.')
-                else:
-                    logger.info('Successfully updated thermostat schedule.')
-            elif return_value < 0:
-                # Failure
-                if notify:
-                    helpers.send_notifications('Ecobee schedule (Failure)',
-                                               'Failure updating thermostat schedule.')
-                else:
-                    logger.error('Failure updating thermostat schedule.')
-            else:
+                title = 'Ecobee schedule (Success)'
+                message = 'Successfully updated thermostat schedule.'
+                # ToDo: Add more robust logging on what the schedule was updated to
+                #  Use 'program' variable with a climates name lookup by climateRef
+                logger.info(message)
+            elif return_value == 0:
                 # No schedule changes required
-                logger.info('The schedule is already up to date, nothing to do.')
+                logger.info('No changes made to the schedule.')
+            else:
+                # Failure
+                title = 'Ecobee schedule (Error)'
+                message = f'Failure updating thermostat schedule --- {return_value}.'
+                logger.error(message)
+
+            if notify and title is not None:
+                helpers.send_notifications(title, message)
+
+    def timeofuse_check(self):
+        if not all(item in self.timeofuse_days for item in self.days_to_set):
+            if self._timeofuse_restricted:
+                return False
+            else:
+                return True
 
     def thermostat_update_required(self):
-        if not all(item in self.timeofuse_days for item in self.days_to_set):
-            logger.warning('One or more days to set falls outside the time of use day range, '
-                           'timeofuse_restricted needs to be set to False to allow thermostat update.')
+        tou_check = self.timeofuse_check()
+        if tou_check == False:  # Don't use 'not' here
+            logger.info('One or more days to set falls outside the time of use day range.\n'
+                        'This is normal behavior but can be overridden by setting timeofuse_restricted '
+                        'to \'False\' which will allow thermostat update.')
             return False
+        elif tou_check:
+            logger.warning('One or more days to set falls outside the time of use day range.\n'
+                           'timeofuse_restricted is set to \'False\', allowing thermostat update.')
 
         thermostat_response_temp = self.get_thermostats(self.selection)
         thermostat_schedule_temp = thermostat_response_temp[self.thermostat_index].program.schedule
@@ -416,7 +462,7 @@ class Ecobee:
 
         if thermostat_schedule_temp == self.thermostat_schedule:
             logger.debug('The schedule is already up to date, checking climates.')
-            if [i for i in thermostat_climates_temp if i not in self.thermostat_climates]:
+            if len(helpers.compare_nested_structures(thermostat_climates_temp, self.thermostat_climates)) == 0:
                 # No updates necessary
                 logger.debug('The climates are already already up to date, no changes necessary.')
                 return False
@@ -474,10 +520,13 @@ class Ecobee:
                 logger.info('All climates already exist, nothing to create.')
 
     def set_thermostat_climates(self, program, update=False, notify=False):
+        title = message = None
         climates = self.thermostat_climates
         for idx, day in enumerate(program):
             if len(day) == 0:
                 continue
+
+            logger.debug(f'Setting climates for {helpers.get_day_name(idx)}.')
 
             for climate_slot in day:
                 climate_ref = climate_slot[0]
@@ -488,31 +537,39 @@ class Ecobee:
                             climate.cool_temp = climate_temp
 
         if update:
+            logger.info('Attempting to update thermostat climates.')
             return_value = self.update_thermostat()
             if return_value > 0:
                 # Success
-                if notify:
-                    helpers.send_notifications('Ecobee climates (Success)',
-                                               'Successfully updated thermostat climates.')
-                else:
-                    logger.info('Successfully updated thermostat climates.')
-            elif return_value < 0:
-                # Failure
-                if notify:
-                    helpers.send_notifications('Ecobee climates (Failure)',
-                                               'Failure updating thermostat climates.')
-                else:
-                    logger.error('Failure updating thermostat climates.')
-            else:
+                title = 'Ecobee climates (Success)'
+                message = 'Successfully updated thermostat climates.'
+                # ToDo: Add more robust logging on what the climates were updated to
+                #  Use 'program' variable with a climates name lookup by climateRef
+                #  Restrict logging to sleep, precool, supercool climates (if necessary)
+                logger.info(message)
+            elif return_value == 0:
                 # No schedule changes required
-                logger.info('The climates are already up to date, nothing to do.')
+                logger.info('No changes made to the climates.')
+            else:
+                # Failure
+                title = 'Ecobee climates (Error)'
+                message = f'Failure updating thermostat climates --- {return_value}.'
+                logger.error(message)
 
-    def get_program_values(self):
+            if notify and title is not None:
+                helpers.send_notifications(title, message)
+
+    def get_program_values(self, notify=False):
         outdoor_temp_high = self.temp_high
+        logger.info(f'Tomorrow\'s outdoor high temperature will be {str(outdoor_temp_high)[0:-1]}.'
+                    f'{str(outdoor_temp_high)[-1]}{chr(176)}.')
+
+        # Create empty program
         program = []
         for i in range(7):
             program.append([])
 
+        # Validate supercool values
         if not isinstance(self.supercool_values, dict):
             logger.error('This function needs a dictionary of supercool program values.')
             return program
@@ -523,10 +580,32 @@ class Ecobee:
                          'please run set_new_climate_names() first.')
             return program
 
+        # Validate hvac mode
+        if self.hvac_mode == "off":
+            logger.info('The HVAC mode is OFF, nothing to do.')
+            return program
+
+        # Validate supercool months
+        if not self.during_supercool_months:
+            logger.info('Running outside supercool months, nothing to do.')
+            return program
+
         # Supercool temp cutoff check
         if self.supercool_cutoff > outdoor_temp_high:
-            logger.info(f'Supercool minimum outdoor temperature cutoff not met'
-                        f'The outdoor temperature must be greater than {self.supercool_cutoff}')
+            # ToDo: Should something overwrite the schedule or leave this manual intervention?
+            #  If no action is taken this leaves the supercool schedule in place
+            #  Can a vacation be leveraged during on-peak hours for that day?
+            title = 'Supercool cutoff not met'
+            message = f'Supercool minimum outdoor temperature cutoff not met.\n' \
+                      f'The outdoor temperature must be greater than ' \
+                      f'{helpers.int_to_degreestring(self.supercool_cutoff)}\n' \
+                      f'This will require manual intervention to prevent the current schedule ' \
+                      f'from running on a day that doesn\'t need supercooling.'
+            if self.timeofuse_check() == False:  # Don't use 'not' here
+                logger.info(message)
+                if notify:
+                    helpers.send_notifications(title, message)
+
             return program
 
         for daynum in self.days_to_set:
@@ -536,7 +615,7 @@ class Ecobee:
                                f'skipping setting this day.')
                 continue
 
-            # Handle setting prior nights sleep climate (only set if 'tomorrow' for day value)
+            # Handle setting prior nights sleep climate (only gets set if 'tomorrow' for day value)
             if daynum - 1 >= 0:
                 previous_daynum = daynum - 1
             else:
@@ -553,7 +632,7 @@ class Ecobee:
                         program[daynum].append([climate_ref, slot[0], slot[1]])
 
                     # Set previous sleep night to match the mornings sleep temp
-                    # ToDo: Eventually modify this to work with any day, not just tomorrow
+                    # ToDo: Modify this to work with any day, not just tomorrow
                     #  Will require pulling outdoor temp on a per day basis
                     if daynum == self.tomorrow_daynum:
                         program[previous_daynum] = [[climate_ref_previous,
@@ -562,7 +641,7 @@ class Ecobee:
 
                     # Handle last day of time of use
                     if daynum == self.timeofuse_days[-1]:
-                        logger.info('Last day of time of use, override sleep temp')
+                        logger.info('Last day of time of use detected, override sleep temp.')
                         program[daynum][-1] = [self.get_climate_ref(name=f'{self.new_climate_prefixes[-1]}{daynum}'),
                                                self.supercool_values[sc_temp][-2][0],
                                                ""]

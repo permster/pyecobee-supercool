@@ -6,6 +6,7 @@ import calendar
 import local_settings
 from datetime import datetime, timedelta
 from ecobee import notifications, logger
+from deepdiff import DeepDiff
 
 
 def get_script_dir():
@@ -94,3 +95,12 @@ def get_range_from_string(x):
     low, high = int(low), int(high)
     result.extend([low, high])
     return result
+
+
+def compare_nested_structures(l1, l2, ignore_case=False, ignore_order=False):
+    return DeepDiff(l1, l2, ignore_string_case=ignore_case, ignore_order=ignore_order)
+
+
+def int_to_degreestring(i):
+    i = str(i)
+    return i[:-1] + "." + i[-1:]
