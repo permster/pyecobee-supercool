@@ -151,6 +151,10 @@ day before (07-04) in order to override the last climate of the previous day (sl
 - **supercool_low_temp_cutoff:** The low-end cutoff temperature to decide whether this program will make any changes.
   - For example, if the cutoff is set to 879 (87.9°) but the outside temperature will only reach 865 (86.5°).
     No changes will be made to the climates or schedule for that day.
+- **supercool_month_range:** A month range reflecting supercool months.  If the current month is outside the range 
+    no program changes will be made.
+  - For example, if the range is set to "05-09" (i.e. May through September) and the current month is February ("02")
+    then no changes will be made to the climates or schedule for that day.
 
 See example file `sample_local_settings.py` for reference.
 
@@ -162,6 +166,8 @@ The program supports the following notification services:
 - Email
 
 Each can be configured with relative ease in the `local_settings.py` file.
+
+There is now a setting to enable/disable notifications called `notifications_enabled` in the setting file.
 
 ## Assumptions and Limitations
 - Time-of-use days are consecutive.  For example, Monday-Friday (0-4).
