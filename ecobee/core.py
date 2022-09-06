@@ -75,9 +75,14 @@ def authenticate(thermostat_name, db_file=None):
 
     now_utc = datetime.now(pytz.utc)
     if now_utc > ecobee_service.refresh_token_expires_on:
+        logger.info('Refresh token expired, attempting to obtain a new access token.')
         authorize(ecobee_service)
         request_tokens(ecobee_service)
     elif now_utc > ecobee_service.access_token_expires_on:
+        logger.info('Access token expired, attempting to refresh the token.')
+        refresh_tokens(ecobee_service)
+    elif now_utc + timedelta(minutes=1) > ecobee_service.access_token_expires_on:
+        logger.info('Access token expires within the next minute, attempting to refresh the token.')
         refresh_tokens(ecobee_service)
 
     return ecobee_service

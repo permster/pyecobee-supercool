@@ -37,15 +37,15 @@ high temp will be 90° versus when it's 110° outside.
 
 The below table is just an example.  It is based on a 5-hour on-peak time window.
 
-|Outdoor Temp|Sleep Temp|Precool Start|Precool Temp|Supercool Start|Supercool Temp|
-|------------|:--------:|:-----------:|:----------:|:-------------:|:------------:|
-|88° - 97°   |76°       |12:30        |75°         |13:30          |74°           |
-|98° - 102°  |76°       |12:00        |75°         |12:30          |73°           |
-|103° - 105° |75°       |11:30        |74°         |12:30          |72°           |
-|106° - 108° |75°       |10:30        |73°         |12:00          |71°           |
-|109° - 111° |74°       |10:00        |72°         |11:30          |70°           |
-|112° - 114° |74°       |09:00        |71°         |11:00          |69°           |
-|115° - ?    |73°       |08:00        |70°         |11:00          |68°           |
+| Outdoor Temp | Sleep Temp | Precool Start | Precool Temp | Supercool Start | Supercool Temp |
+|--------------|:----------:|:-------------:|:------------:|:---------------:|:--------------:|
+| 88° - 97°    |    76°     |     12:30     |     75°      |      13:30      |      74°       |
+| 98° - 102°   |    76°     |     12:00     |     75°      |      12:30      |      73°       |
+| 103° - 105°  |    75°     |     11:30     |     74°      |      12:30      |      72°       |
+| 106° - 108°  |    75°     |     10:30     |     73°      |      12:00      |      71°       |
+| 109° - 111°  |    74°     |     10:00     |     72°      |      11:30      |      70°       |
+| 112° - 114°  |    74°     |     09:00     |     71°      |      11:00      |      69°       |
+| 115° - ?     |    73°     |     08:00     |     70°      |      11:00      |      68°       |
 
 **Note:**
 - The table is based on on-peak time between: 15:00 - 20:00
@@ -78,15 +78,15 @@ The climate names and order used in `supercool_values` are based on the `climate
 I've taken the liberty of showing the `supercool_values` in a table layout for a better visualization of what 
 `supercool_values` represents.
 
-|Outdoor Temp Range  |Sleep Temp|Sleep End Time|Precool Temp|Precool End Time|Supercool Temp|Supercool End Time|Away Temp|Away End Time|Home Temp|Home End Time|Home Temp|Sleepnight End Time|
-|--------------------|:--------:|:------------:|:----------:|:--------------:|:------------:|:----------------:|:-------:|:-----------:|:-------:|:-----------:|:-------:|:-----------------:|
-|"880-979"           |760       |"12:30"       |750         |"13:30"         |740           |"15:00"           |820      |"20:00"      |770      |"22:00"      |760      |""                 |
-|"980-1029"          |760       |"12:00"       |750         |"12:30"         |730           |"15:00"           |820      |"20:00"      |770      |"22:00"      |760      |""                 |
-|"1030-1059"         |750       |"11:30"       |740         |"12:30"         |720           |"15:00"           |820      |"20:00"      |770      |"22:00"      |750      |""                 |
-|"1060-1089"         |750       |"10:30"       |730         |"12:00"         |710           |"15:00"           |820      |"20:00"      |770      |"22:00"      |750      |""                 |
-|"1090-1119"         |740       |"10:00"       |720         |"11:30"         |700           |"15:00"           |820      |"20:00"      |770      |"22:00"      |740      |""                 |
-|"1120-1149"         |740       |"09:00"       |710         |"11:00"         |690           |"15:00"           |820      |"20:00"      |770      |"22:00"      |740      |""                 |
-|"1150-1300"         |730       |"08:00"       |700         |"11:00"         |680           |"15:00"           |820      |"20:00"      |770      |"22:00"      |730      |""                 |
+| Outdoor Temp Range | Sleep Temp | Sleep End Time | Precool Temp | Precool End Time | Supercool Temp | Supercool End Time | Away Temp | Away End Time | Home Temp | Home End Time | Home Temp | Sleepnight End Time |
+|--------------------|:----------:|:--------------:|:------------:|:----------------:|:--------------:|:------------------:|:---------:|:-------------:|:---------:|:-------------:|:---------:|:-------------------:|
+| 88°-97.9°          |    76°     |     12:30      |     75°      |      13:30       |      74°       |       15:00        |    82°    |     20:00     |    77°    |     22:00     |    76°    |         N/A         |
+| 98°-102.9°         |    76°     |     12:00      |     75°      |      12:30       |      73°       |       15:00        |    82°    |     20:00     |    77°    |     22:00     |    76°    |         N/A         |
+| 103°-105.9°        |    75°     |     11:30      |     74°      |      12:30       |      72°       |       15:00        |    82°    |     20:00     |    77°    |     22:00     |    75°    |         N/A         |
+| 106°-108.9°        |    75°     |     10:30      |     73°      |      12:00       |      71°       |       15:00        |    82°    |     20:00     |    77°    |     22:00     |    75°    |         N/A         |
+| 109°-111.9°        |    74°     |     10:00      |     72°      |      11:30       |      70°       |       15:00        |    82°    |     20:00     |    77°    |     22:00     |    74°    |         N/A         |
+| 112°-114.9°        |    74°     |     09:00      |     71°      |      11:00       |      69°       |       15:00        |    82°    |     20:00     |    77°    |     22:00     |    74°    |         N/A         |
+| 115°-130°          |    73°     |     08:00      |     70°      |      11:00       |      68°       |       15:00        |    82°    |     20:00     |    77°    |     22:00     |    73°    |         N/A         |
 
 A few things to note:
 - Start times of each climate are omitted.
@@ -96,7 +96,7 @@ A few things to note:
 
 One challenge with this dynamic approach to climates is that they will step on each other.  One example is if you
 use the `Sleep` climate in the morning and again at night on the same day.  In this scenario you can't have
-unique climate values for morning sleep versus night sleep.  To workaround the issue of
+unique climate values for morning sleep versus night sleep.  To work around the issue of
 overwriting climates still remaining on the current day, each day has a unique set of climates.
 - Monday: sleep0, precool0, supercool0, away0, home0, sleepnight0
 - Tuesday: sleep1, precool1, supercool1, away1, home1, sleepnight1
@@ -139,7 +139,7 @@ day before (07-04) in order to override the last climate of the previous day (sl
   - Allows for varied values like "Mon,Tue,Wednesday" or "tomorrow" or "weekdays" for example. 
 - **timeofuse_day_range:** A day range reflecting time-of-use days.  This is expected to be a consecutive day range.
   - This is a day index starting with 0 - Monday.  So `"0-4"` would be Monday-Friday as your time-of-use days.
-- **timeofuse_restricted:** Whether or not to limit the days being set to time-of-use days. (bool)
+- **timeofuse_restricted:** Whether to limit the days being set to time-of-use days. (bool)
   - If `True` and the `days_to_set` fall outside a time-of-use day then no change is made.
 - **timeofuse_holidays:** A list of off-peak vacation days. (comma separated)
 - **timeofuse_holidays_cool_temp:** The cool temp to hold the program at during the off-peak vacation days. (not padded)

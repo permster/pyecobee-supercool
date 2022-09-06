@@ -35,7 +35,7 @@ thermostat.set_new_climate_names(create=True, notify=notify)
 program_values = thermostat.get_program_values(notify=notify)
 
 # Update program climates
-# thermostat.set_thermostat_climates(program=program_values, update=True, notify=notify)
+thermostat.set_thermostat_climates(program=program_values, update=True, notify=notify)
 
 # Update schedule
 thermostat.set_thermostat_schedule(program=program_values, update=True, notify=notify)
