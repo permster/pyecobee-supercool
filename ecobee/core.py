@@ -392,6 +392,12 @@ class Ecobee:
                 schedule.append([])
                 schedule[i].extend([self.DEFAULT_CLIMATE] * 48)
 
+        # check if program is empty
+        if not any(program):
+            # No program changes required
+            logger.info('No program updates, no changes made to the schedule.')
+            return
+
         for idx, day in enumerate(program):
             if len(day) == 0:
                 continue
@@ -527,6 +533,13 @@ class Ecobee:
     def set_thermostat_climates(self, program, update=False, notify=False):
         title = message = None
         climates = self.thermostat_climates
+
+        # check if program is empty
+        if not any(program):
+            # No program changes required
+            logger.info('No program updates, no changes made to the climates.')
+            return
+
         for idx, day in enumerate(program):
             if len(day) == 0:
                 continue
@@ -603,13 +616,17 @@ class Ecobee:
             title = 'Supercool cutoff not met'
             message = f'Supercool minimum outdoor temperature cutoff not met.\n' \
                       f'The outdoor temperature must be greater than ' \
-                      f'{helpers.int_to_degreestring(self.supercool_cutoff)}\n' \
-                      f'This will require manual intervention to prevent the current schedule ' \
-                      f'from running on a day that doesn\'t need supercooling.'
-            if self.timeofuse_check() == False:  # Don't use 'not' here
-                logger.info(message)
-                if notify:
-                    helpers.send_notifications(title, message)
+                      f'{helpers.int_to_degreestring(self.supercool_cutoff)}{chr(176)}.'
+
+            if self.timeofuse_check():
+                message = f'{message}\n\nThis will require manual intervention to prevent' \
+                          f' the current schedule from running on a day that doesn\'t' \
+                          f' need supercooling!\n'
+
+            logger.info(message)
+
+            if notify:
+                helpers.send_notifications(title, message)
 
             return program
 
