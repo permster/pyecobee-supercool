@@ -599,9 +599,9 @@ class Ecobee:
             return program
 
         # Validate hvac mode
-        if self.hvac_mode == "off":
-            logger.info('The HVAC mode is OFF, nothing to do.')
-            return program
+        # if self.hvac_mode == "off":
+        #     logger.info('The HVAC mode is OFF, nothing to do.')
+        #     return program
 
         # Validate supercool months
         if not self.during_supercool_months:
@@ -629,6 +629,19 @@ class Ecobee:
                 helpers.send_notifications(title, message)
 
             return program
+        else:
+            # Supercool temp threshold met, check if HVAC mode is off
+            if self.hvac_mode == "off":
+                title = 'Warning - HVAC mode is OFF'
+                message = f'Supercool minimum outdoor temperature cutoff has been met.  ' \
+                          f'However, the HVAC mode is off.\n\nThe HVAC mode will need to ' \
+                          f'be turned ON manually prior to the precool schedule start ' \
+                          f'time tomorrow.'
+
+                logger.info(message)
+
+                if notify:
+                    helpers.send_notifications(title, message)
 
         for daynum in self.days_to_set:
             # Check if we have high temp for this day
