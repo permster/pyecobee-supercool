@@ -622,11 +622,11 @@ class Ecobee:
                 message = f'{message}\n\nThis will require manual intervention to prevent' \
                           f' the current schedule from running on a day that doesn\'t' \
                           f' need supercooling!\n'
+            else:
+                if notify:
+                    helpers.send_notifications(title, message)
 
             logger.info(message)
-
-            if notify:
-                helpers.send_notifications(title, message)
 
             return program
         else:
