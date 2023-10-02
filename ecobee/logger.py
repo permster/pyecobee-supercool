@@ -42,7 +42,7 @@ def initLogger(debug=False, logfile=None, loglevel=None):
             logging_file.setLevel(logging.INFO)
         logger.addHandler(logging_file)
 
-    if debug:
+    if debug or sys.gettrace() is not None:
         logger.setLevel(logging.DEBUG)
     else:
         logger.setLevel(logging.INFO)

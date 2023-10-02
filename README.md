@@ -35,10 +35,11 @@ The amount of supercooling necessary is dependent on many factors such as:
 The main takeaway there is that you <ins>don't</ins> need to supercool your house to the same level if the outside
 high temp will be 90° versus when it's 110° outside.
 
-The below table is just an example.  It is based on a 5-hour on-peak time window.
+The below table is just an example.  It is based on a 3-hour on-peak time window.
 
 | Outdoor Temp | Sleep Temp | Precool Start | Precool Temp | Supercool Start | Supercool Temp |
 |--------------|:----------:|:-------------:|:------------:|:---------------:|:--------------:|
+| 82° - 87°    |    77°     |     12:30     |     77°      |      14:30      |      75°       |
 | 88° - 97°    |    76°     |     12:30     |     75°      |      13:30      |      74°       |
 | 98° - 102°   |    76°     |     12:00     |     75°      |      12:30      |      73°       |
 | 103° - 105°  |    75°     |     11:30     |     74°      |      12:30      |      72°       |
@@ -47,12 +48,17 @@ The below table is just an example.  It is based on a 5-hour on-peak time window
 | 112° - 114°  |    74°     |     09:00     |     71°      |      11:00      |      69°       |
 | 115° - ?     |    73°     |     08:00     |     70°      |      11:00      |      68°       |
 
-**Note:**
-- The table is based on on-peak time between: 15:00 - 20:00
+**Notes:**
+- The table is based on on-peak time between: 16:00 - 19:00
 - Your start times and cool temps will vary.
 - The supercool temps in the table require that the target cool temp is reached prior to on-peak, 
-  15:00 in this example. This may require starting the precool and supercool climates earlier in
+  16:00 in this example. This may require starting the precool and supercool climates earlier in
   the day and/or lowering the cool temps for the climates leading up to on-peak.
+- The first row in the table is really only necessary if you want to handle days that only require 
+  a small amount of cooling prior to the on-peak time window.  On these days your HVAC is typically 
+  off overnight since it's cooler outside. Prior to the supercool start you will want to close all 
+  doors and windows and turn the HVAC on.  If the next days temperature will also be cool then feel
+  free to turn off the HVAC anytime after the on-peak time window and open your doors and windows back up.
 
 ## Initial set up
 Clone/download the repository and run `pip install -r requirements.txt`.
@@ -80,13 +86,14 @@ I've taken the liberty of showing the `supercool_values` in a table layout for a
 
 | Outdoor Temp Range | Sleep Temp | Sleep End Time | Precool Temp | Precool End Time | Supercool Temp | Supercool End Time | Away Temp | Away End Time | Home Temp | Home End Time | Home Temp | Sleepnight End Time |
 |--------------------|:----------:|:--------------:|:------------:|:----------------:|:--------------:|:------------------:|:---------:|:-------------:|:---------:|:-------------:|:---------:|:-------------------:|
-| 88°-97.9°          |    76°     |     12:30      |     75°      |      13:30       |      74°       |       15:00        |    82°    |     20:00     |    77°    |     22:00     |    76°    |         N/A         |
-| 98°-102.9°         |    76°     |     12:00      |     75°      |      12:30       |      73°       |       15:00        |    82°    |     20:00     |    77°    |     22:00     |    76°    |         N/A         |
-| 103°-105.9°        |    75°     |     11:30      |     74°      |      12:30       |      72°       |       15:00        |    82°    |     20:00     |    77°    |     22:00     |    75°    |         N/A         |
-| 106°-108.9°        |    75°     |     10:30      |     73°      |      12:00       |      71°       |       15:00        |    82°    |     20:00     |    77°    |     22:00     |    75°    |         N/A         |
-| 109°-111.9°        |    74°     |     10:00      |     72°      |      11:30       |      70°       |       15:00        |    82°    |     20:00     |    77°    |     22:00     |    74°    |         N/A         |
-| 112°-114.9°        |    74°     |     09:00      |     71°      |      11:00       |      69°       |       15:00        |    82°    |     20:00     |    77°    |     22:00     |    74°    |         N/A         |
-| 115°-130°          |    73°     |     08:00      |     70°      |      11:00       |      68°       |       15:00        |    82°    |     20:00     |    77°    |     22:00     |    73°    |         N/A         |
+| 82°-87.9°          |    77°     |     12:30      |     77°      |      14:30       |      75°       |       16:00        |    82°    |     19:00     |    77°    |     22:00     |    77°    |         N/A         |
+| 88°-97.9°          |    76°     |     12:30      |     75°      |      13:30       |      74°       |       16:00        |    82°    |     19:00     |    77°    |     22:00     |    76°    |         N/A         |
+| 98°-102.9°         |    76°     |     12:00      |     75°      |      12:30       |      73°       |       16:00        |    82°    |     19:00     |    77°    |     22:00     |    76°    |         N/A         |
+| 103°-105.9°        |    75°     |     11:30      |     74°      |      12:30       |      72°       |       16:00        |    82°    |     19:00     |    77°    |     22:00     |    75°    |         N/A         |
+| 106°-108.9°        |    75°     |     10:30      |     73°      |      12:00       |      71°       |       16:00        |    82°    |     19:00     |    77°    |     22:00     |    75°    |         N/A         |
+| 109°-111.9°        |    74°     |     10:00      |     72°      |      11:30       |      70°       |       16:00        |    82°    |     19:00     |    77°    |     22:00     |    74°    |         N/A         |
+| 112°-114.9°        |    74°     |     09:00      |     71°      |      11:00       |      69°       |       16:00        |    82°    |     19:00     |    77°    |     22:00     |    74°    |         N/A         |
+| 115°-130°          |    73°     |     08:00      |     70°      |      11:00       |      68°       |       16:00        |    82°    |     19:00     |    77°    |     22:00     |    73°    |         N/A         |
 
 A few things to note:
 - Start times of each climate are omitted.

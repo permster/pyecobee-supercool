@@ -3,6 +3,7 @@ loglevel = "WARNING"
 thermostat_name = "Home"
 climates = "sleep,precool,supercool,away,home,sleepnight"  # Order needs to match supercool_values order below
 supercool_values = {
+    "820-879": [[770, "12:30"], [770, "14:30"], [750, "16:00"], [820, "19:00"], [770, "22:00"], [770, ""]],
     "880-979": [[760, "12:30"], [750, "13:30"], [740, "16:00"], [820, "19:00"], [770, "22:00"], [760, ""]],
     "980-1029": [[760, "12:00"], [750, "12:30"], [730, "16:00"], [820, "19:00"], [770, "22:00"], [760, ""]],
     "1030-1059": [[750, "11:30"], [740, "12:30"], [720, "16:00"], [820, "19:00"], [770, "22:00"], [750, ""]],
@@ -14,20 +15,20 @@ supercool_values = {
 days_to_set = "tomorrow"
 timeofuse_day_range = "0-4"
 timeofuse_restricted = True
-timeofuse_holidays = "2022-01-01," \
-                     "2022-01-17," \
-                     "2022-02-21," \
-                     "2021-03-31," \
-                     "2022-05-30," \
-                     "2022-07-04," \
-                     "2022-09-05," \
-                     "2022-11-11," \
-                     "2022-11-24," \
-                     "2022-12-26"
+timeofuse_holidays = "2023-01-01," \
+                     "2023-01-16," \
+                     "2023-02-20," \
+                     "2023-03-31," \
+                     "2023-05-29," \
+                     "2023-07-04," \
+                     "2023-09-04," \
+                     "2023-11-10," \
+                     "2023-11-23," \
+                     "2023-12-25"
 timeofuse_holidays_cool_temp = 77
 timeofuse_holidays_start_time = "19:00"
 timeofuse_holidays_end_time = "19:00"
-supercool_low_temp_cutoff = 879
+supercool_low_temp_cutoff = 819
 supercool_month_range = "04-10"
 notifications_enabled = True
 pushbullet_enabled = False

@@ -9,8 +9,11 @@ from datetime import datetime, timedelta
 from ecobee import helpers, logger
 from pytz import timezone
 
+DB_FILE = f'{helpers.get_script_dir()}/pyecobee_db'
 
-def persist_to_shelf(file_name, ecobee_service):
+
+def persist_to_shelf(ecobee_service, file_name=DB_FILE):
+    logger.debug(f'Shelve file: {file_name}')
     pyecobee_db = shelve.open(file_name, protocol=2)
     pyecobee_db[ecobee_service.thermostat_name] = ecobee_service
     pyecobee_db.close()
@@ -21,7 +24,7 @@ def refresh_tokens(ecobee_service):
     logger.debug('TokenResponse returned from ecobee_service.refresh_tokens():\n{0}'.format(
         token_response.pretty_format()))
 
-    persist_to_shelf('pyecobee_db', ecobee_service)
+    persist_to_shelf(ecobee_service)
 
 
 def request_tokens(ecobee_service):
@@ -29,7 +32,7 @@ def request_tokens(ecobee_service):
     logger.debug('TokenResponse returned from ecobee_service.request_tokens():\n{0}'.format(
         token_response.pretty_format()))
 
-    persist_to_shelf('pyecobee_db', ecobee_service)
+    persist_to_shelf(ecobee_service)
 
 
 def authorize(ecobee_service):
@@ -37,7 +40,7 @@ def authorize(ecobee_service):
     logger.debug('AuthorizeResponse returned from ecobee_service.authorize():\n{0}'.format(
         authorize_response.pretty_format()))
 
-    persist_to_shelf('pyecobee_db', ecobee_service)
+    persist_to_shelf(ecobee_service)
 
     logger.info('Please goto ecobee.com, login to the web portal and click on the settings tab. Ensure the My '
                 'Apps widget is enabled. If it is not click on the My Apps option in the menu on the left. In the '
@@ -51,7 +54,7 @@ def authorize(ecobee_service):
 def authenticate(thermostat_name, db_file=None):
     pyecobee_db = ecobee_service = None
     if db_file is None:
-        db_file = f'{helpers.get_script_dir()}/pyecobee_db'
+        db_file = DB_FILE
     try:
         pyecobee_db = shelve.open(db_file, protocol=2)
         ecobee_service = pyecobee_db[thermostat_name]
@@ -449,23 +452,34 @@ class Ecobee:
             if notify and title is not None:
                 helpers.send_notifications(title, message)
 
-    def timeofuse_check(self):
-        if not all(item in self.timeofuse_days for item in self.days_to_set):
-            if self._timeofuse_restricted:
-                return False
-            else:
-                return True
+    def days_to_set_are_all_timeofuse(self):
+        # Verify that all the days requested to be updated in the schedule fall within time of use days
+        if all(item in self.timeofuse_days for item in self.days_to_set):
+            # All days to set fall on time of use days
+            return True
+        else:
+            # At least one day to set falls on a day that is not time of use
+            return False
+
+    def days_to_set_are_partial_timeofuse(self):
+        # Verify that any of the days requested to be updated in the schedule fall within time of use days
+        if any(item in self.timeofuse_days for item in self.days_to_set):
+            # At least one day to set falls on a time of use day
+            return True
+        else:
+            # No days to set fall on a time of use day
+            return False
 
     def thermostat_update_required(self):
-        tou_check = self.timeofuse_check()
-        if tou_check == False:  # Don't use 'not' here
-            logger.info('One or more days to set falls outside the time of use day range.\n'
-                        'This is normal behavior but can be overridden by setting timeofuse_restricted '
-                        'to \'False\' which will allow thermostat update.')
-            return False
-        elif tou_check:
-            logger.warning('One or more days to set falls outside the time of use day range.\n'
-                           'timeofuse_restricted is set to \'False\', allowing thermostat update.')
+        if not self.days_to_set_are_all_timeofuse():
+            if self.timeofuse_restricted:
+                logger.info('One or more days to set falls outside the time of use day range.\n'
+                            'This is normal behavior but can be overridden by setting timeofuse_restricted '
+                            'to \'False\' which will allow thermostat update.')
+                return False
+            else:
+                logger.warning('One or more days to set falls outside the time of use day range.\n'
+                               'timeofuse_restricted is set to \'False\', allowing thermostat update.')
 
         thermostat_response_temp = self.get_thermostats(self.selection)
         thermostat_schedule_temp = thermostat_response_temp[self.thermostat_index].program.schedule
@@ -618,7 +632,7 @@ class Ecobee:
                       f'The outdoor temperature must be greater than ' \
                       f'{helpers.int_to_degreestring(self.supercool_cutoff)}{chr(176)}.'
 
-            if self.timeofuse_check():
+            if self.days_to_set_are_partial_timeofuse():
                 message = f'{message}\n\nThis will require manual intervention to prevent' \
                           f' the current schedule from running on a day that doesn\'t' \
                           f' need supercooling!\n'
@@ -757,6 +771,10 @@ class Ecobee:
             return -1
 
     def create_vacation(self, name, start_date, end_date, cool_temp, heat_temp=45, force=False):
+        if not self.timezone:
+            logger.error('No time zone, set your timezone on the ecobee website')
+            return False
+
         tz = timezone(self.timezone)
         # Subtract a day from off-peak (vacation) start date to handle the previous nights sleep climate override
         start_date = datetime.strptime(start_date, "%Y-%m-%d %H:%M") - timedelta(days=1)
